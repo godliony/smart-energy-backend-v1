@@ -19,7 +19,6 @@ const ROLES_LIST = require('./config/roles_list')
 const verifyRoles = require('./middleware/verifyRoles')
 
 module.exports = (app) => {
-
     
     app.post('/auth/login', AuthController.handleLogin)
     app.get('/auth/refreshToken', AuthController.handleRefreshToken)
@@ -80,6 +79,8 @@ module.exports = (app) => {
 
 
     app.get('/meter/:id/lastValue', MeterController.showMeterLastValue)
+    app.post('/meter/lastValue', MeterController.showMultipleMeterLastValue)
+
 
     
 

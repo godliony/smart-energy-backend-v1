@@ -8,7 +8,7 @@ const {User,UserRole, UserRefreshToken,Role} = require('../models')
 ShopAd.belongsTo(Shop, {foreignKey : 'id'}) */
 
 
-const accessTokenExpiresIn = '5s'
+const accessTokenExpiresIn = '15m'
 const refreshTokenExpiresIn = '99y'
 module.exports = {
 
@@ -19,7 +19,7 @@ module.exports = {
           const { username, password } = req.body
           if (!username || !password) return res.status(400).json({ 'message': 'Username and password are required' })
 
-          const user = await User.findOne({
+          let user = await User.findOne({
             where: {
               username: username
             },
@@ -88,12 +88,13 @@ module.exports = {
                 'token': newRefreshToken
               })
               res.cookie('jwt', newRefreshToken, { httpOnly: true, secure: false, maxAge: 24 * 60 * 60 * 1000 })
+              user['password'] = "";
               res.json({ user, roles,accessToken })
           } else {
               return res.status(401).json({ 'message': 'Username or Password incorrect!' })
           }
         }catch(e){
-          res.status(500).send(err.message).send(err)
+          res.status(500).send(e.message)
           console.error(e)
         }
     },
@@ -130,7 +131,7 @@ module.exports = {
         res.clearCookie('jwt', { httpOnly: true, secure: false, sameSite: 'None'}) // secure: false - only serves on https
         res.sendStatus(204)
       }catch(e){
-        res.status(500).send(err.message).send(err)
+        res.status(500).send(e.message)
         console.error(e)
       }
     },
@@ -239,12 +240,13 @@ module.exports = {
               user_id: user.id,
               token: newRefreshToken
             })
+            user['password'] = "";
             res.cookie('jwt', newRefreshToken, { httpOnly: true, secure: false, maxAge: 24 * 60 * 60 * 1000 })
             res.json({ user, roles,accessToken })
           }
         )
       }catch(e){
-        res.status(500).send(err.message).send(err)
+        res.status(500).send(e.message)
         console.error(e)
       }
     },
@@ -278,7 +280,7 @@ module.exports = {
         }) */
         res.send({'success': `New user ${username} created!`})
       } catch (err) {
-          res.status(500).send(err.message).send(err)
+          res.status(500).send(e.message)
           console.error(err)
       }
     }

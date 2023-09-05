@@ -58,7 +58,7 @@ class ModbusRead {
             }
             await this.sleep(1000)
             const currentTime = Math.floor(Date.now() / 1000)
-            if (currentTime - this.prevTimeReading < 5) continue
+            if (currentTime - this.prevTimeReading < 3) continue
             const meters = await Meter.findAll({
               where: {
                 "active": 1
@@ -72,6 +72,7 @@ class ModbusRead {
                   let modbusRes;
                   let data = {}
                   data['meter_id'] = meter.id
+                  data['meter_name'] = meter.name
                   this.modbus.setID(meter.rs485_no)
                   if (meter.sett_v1_addr && meter.sett_v1_dataLength && meter.sett_v1_dataType) {
                     modbusRes = await this.modbus.readHoldingRegisters(meter.sett_v1_addr, meter.sett_v1_dataLength)
@@ -155,6 +156,21 @@ class ModbusRead {
                   this.metersData[meter.id] = data
 
                 } catch (err) {
+                  this.metersData[meter.id] = {
+                    meter_id: meter.id,
+                    meter_name: meter.name,
+                    v1: 0.00,
+                    v2: 0.00,
+                    v3: 0.00,
+                    vAvg : 0.00,
+                    i1: 0.00,
+                    i2: 0.00,
+                    i3: 0.00,
+                    iAvg: 0.00,
+                    kWh: 0.00,
+                    pf: 0.00,
+                    freq: 0.00
+                  }
                   console.error(err.message)
                   if (err.message === 'Timed out') {
                     console.error('Modbus connection timed out, reconnecting...');

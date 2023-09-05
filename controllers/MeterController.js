@@ -84,17 +84,18 @@ module.exports = {
                 where: {
                     [Op.or]: [
                         { 'name': name },
+                        { 'rs485_no': rs485_no },
                       ]
                 }
             })
-            if (duplicate) return res.status(409).send({'message': 'Name is Duplicate !'}) // Conflict
+            if (duplicate) return res.status(409).send({'message': 'Name or ID485 Duplicate !'}) // Conflict
 
             const meter = await Meter.create(req.body);
 
             
             res.send(meter)
         } catch (err) {
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
             console.error(err)
         }
 
@@ -176,10 +177,27 @@ module.exports = {
             const {modbusRead} = require('./Rs485Controller');
             const id = req.params.id
             if(!id) return res.status(403).send({
-                error: 'meter_id is required!'
+                error: 'id is required!'
             })
             const meterLastValue = modbusRead.getMeterValue(id)
             res.send(meterLastValue ?? {})
+        }catch(e){
+            res.status(500).send(err.message)
+            console.error(err)
+        }
+    },
+    showMultipleMeterLastValue(req,res){
+        try{
+            const {modbusRead} = require('./Rs485Controller');
+            const id = req.body.id
+            let arrData = []
+            if(!id) return res.status(403).send({
+                error: 'id is required!'
+            })
+            for(let i=0; i<id.length; i++){
+                arrData.push(modbusRead.getMeterValue(id[i]) ?? {})
+            }
+            res.send(arrData)
         }catch(e){
             res.status(500).send(err.message)
             console.error(err)
