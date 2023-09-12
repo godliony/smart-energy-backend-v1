@@ -13,7 +13,7 @@ module.exports = {
             return res.send(roles)
         } catch (err) {
             console.error(err)
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
         }
     },
     //get role pagination
@@ -64,7 +64,7 @@ module.exports = {
             return res.send(response)
         } catch (err) {
             console.error(err)
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
         }
     },
 
@@ -94,7 +94,7 @@ module.exports = {
             
             res.send(role)
         } catch (err) {
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
             console.error(err)
         }
 
@@ -122,7 +122,7 @@ module.exports = {
 
             res.send(req.body)
         } catch (err) {
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
             console.error(err)
         }
     },
@@ -147,7 +147,7 @@ module.exports = {
             })
             return res.sendStatus(200)
         } catch (err) {
-            return res.status(500).send(err.message).send(err)
+            return res.status(500).send(err.message)
         }
     },
     // show role
@@ -166,7 +166,7 @@ module.exports = {
             }
             res.send(role.toJSON())
         } catch (err) {
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
             console.error(err)
         }
     }

@@ -13,7 +13,7 @@ module.exports = {
             return res.send(holidays)
         } catch (err) {
             console.error(err)
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
         }
     },
     async index(req, res) {
@@ -63,7 +63,7 @@ module.exports = {
             return res.send(response)
         } catch (err) {
             console.error(err)
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
         }
     },
 
@@ -93,7 +93,7 @@ module.exports = {
             
             res.send(holiday)
         } catch (err) {
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
             console.error(err)
         }
 
@@ -121,7 +121,7 @@ module.exports = {
 
             res.send(req.body)
         } catch (err) {
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
             console.error(err)
         }
     },
@@ -146,7 +146,7 @@ module.exports = {
             })
             return res.sendStatus(200)
         } catch (err) {
-            return res.status(500).send(err.message).send(err)
+            return res.status(500).send(err.message)
         }
     },
     // show holiday
@@ -165,7 +165,7 @@ module.exports = {
             }
             res.send(holiday.toJSON())
         } catch (err) {
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
             console.error(err)
         }
     }

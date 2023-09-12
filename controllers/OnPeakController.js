@@ -13,7 +13,7 @@ module.exports = {
             
         } catch (err) {
             console.error(err)
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
         }
     },
     async put(req, res) {
@@ -30,7 +30,7 @@ module.exports = {
             await utilities.writeJSONFile('config/config.json',newConfig)
             return res.send(req.body)
         } catch (err) {
-            res.status(500).send(err.message).send(err)
+            res.status(500).send(err.message)
             console.error(err)
         }
     },
