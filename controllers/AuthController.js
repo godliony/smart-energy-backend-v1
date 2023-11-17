@@ -9,7 +9,7 @@ ShopAd.belongsTo(Shop, {foreignKey : 'id'}) */
 
 
 const accessTokenExpiresIn = '15m'
-const refreshTokenExpiresIn = '99y'
+const refreshTokenExpiresIn = '365d'
 module.exports = {
 
     // Login

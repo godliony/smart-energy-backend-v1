@@ -1,1 +1,1 @@
-{"rs485":{"port":"COM3","baudRate":"9600","parity":"none","dataBits":"8","stopBits":"1"},"timezone":"Asia/Bangkok","startOnPeak":9,"endOnPeak":22,"costOnPeak":"4.9","costOffPeak":"4.9","limitMeter":2}
+{"rs485":{"port":"COM3","baudRate":"9600","parity":"none","dataBits":"8","stopBits":"1"},"timezone":"Asia/Bangkok","startOnPeak":9,"endOnPeak":22,"costOnPeak":"4.9","costOffPeak":"2.9","limitMeter":5}
