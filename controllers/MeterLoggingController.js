@@ -12,6 +12,85 @@ const utilities = require('../utilities')
 const moment = require('moment-timezone');
 
 module.exports = {
+    async index(req,res){
+        try{
+            const formatDate = "YYYY-MM-DDTHH:mm:ss.SSSZ";
+            const config = await utilities.readJSONFile('config/config.json')
+
+            const page = req.body.page || 1
+            const perPage = req.body.perPage || 10
+
+            let whereCondition = {}
+            let orderQuery = []
+
+            const {
+                startDate,
+                endDate,
+                meter_id
+            } = req.body.query
+
+            if (!startDate) return res.status(400).json({
+                'message': 'startDate is required'
+            })
+
+            if (!endDate) return res.status(400).json({
+                'message': 'endDate is required'
+            })
+
+            if (!meter_id) return res.status(400).json({
+                'message': 'meter_id is required'
+            })
+            if (!moment(startDate, formatDate, true).isValid()) throw new Error('Invalid Start Date')
+            const startDateTimezone = moment.tz(startDate, config.timezone)
+
+
+            if (!moment(endDate, formatDate, true).isValid()) throw new Error('Invalid End Date')
+            const endDateTimezone = moment.tz(endDate, config.timezone)
+
+
+
+            let startDateLoc = startDateTimezone.clone().startOf('date').toISOString();
+            let endDateLoc = endDateTimezone.clone().endOf('date').toISOString();
+
+            if (meter_id) whereCondition.meter_id = meter_id
+
+            if (req.body.sort?.field && req.body.sort?.field !== '' && req.body.sort?.type !== 'none') {
+                orderQuery.push([`${req.body.sort.field}`, req.body.sort.type])
+            }
+
+            whereCondition.timestamp = {
+                [Op.between]: [startDateLoc, endDateLoc]
+            }
+
+            const countRawData = await MeterLogging.findAll({
+                attributes:['id'],
+                where: whereCondition,
+                raw: true
+            })
+
+            const total = countRawData.length
+
+            const raw_data = await MeterLogging.findAll({
+                attributes:['timestamp','v1','v2','v3','vAvg','i1','i2','i3','iAvg','kWh','pf','freq'],
+                where: whereCondition,
+                order: orderQuery,
+                offset: (page - 1) * perPage,
+                limit: perPage,
+                raw: true
+            })
+
+            let response = {
+                totalRecords: total,
+                rows: raw_data
+            }
+
+
+            return res.send(response)
+            
+        }catch(e){
+            console.error(e)
+        }
+    },
     async kWhReportMonthly(req, res) {
         try {
             const config = await utilities.readJSONFile('config/config.json')
@@ -152,14 +231,6 @@ module.exports = {
             whereCondition.timestamp = {
                 [Op.between]: [startDate, endDate]
             }
-            /* const kWh = await MeterLogging.findOne({
-                attributes: [
-                    [Sequelize.fn('sum', Sequelize.literal(`case when hour IN (${rangeHour.join(',')}) and dow NOT IN (0,6) then diff_kWh else 0 end`)), 'onPeak'],
-                    [Sequelize.fn('sum', Sequelize.literal(`case when hour NOT IN (${rangeHour.join(',')}) or dow IN (0,6) then diff_kWh else 0 end`)), 'offPeak'],
-                ],
-                where: whereCondition,
-                raw: true
-            }) */
             const holidays = await Holiday.findAll({
                 attributes:['holiday_date'],
                 raw:true
@@ -679,7 +750,71 @@ module.exports = {
         return res.json({
             'onPeak': fnConditionOnPeak(startOnPeak, endOnPeak)
         })
-    }
+    },
+
+    async raw_data_csv(req,res){
+        try{
+            const formatDate = "YYYY-MM-DDTHH:mm:ss.SSSZ";
+            const config = await utilities.readJSONFile('config/config.json')
+            let whereCondition = {}
+
+            const {
+                startDate,
+                endDate,
+                meter_id
+            } = req.body
+            if (!startDate) return res.status(400).json({
+                'message': 'startDate is required'
+            })
+
+            if (!endDate) return res.status(400).json({
+                'message': 'endDate is required'
+            })
+
+            if (!moment(startDate, formatDate, true).isValid()) throw new Error('Invalid Start Date')
+            const startDateTimezone = moment.tz(startDate, config.timezone)
+
+            if (!moment(endDate, formatDate, true).isValid()) throw new Error('Invalid End Date')
+            const endDateTimezone = moment.tz(endDate, config.timezone)
+
+
+            let startDateLoc = startDateTimezone.clone().startOf('day').toISOString();
+            let endDateLoc = endDateTimezone.clone().endOf('day').toISOString();
+
+            if (meter_id) whereCondition.meter_id = meter_id
+
+            whereCondition.timestamp = {
+                [Op.between]: [startDateLoc, endDateLoc]
+            }
+
+            const raw_data = (await MeterLogging.findAll({
+                attributes:['timestamp','v1','v2','v3','vAvg','i1','i2','i3','iAvg','kWh','pf','freq'],
+                where: whereCondition,
+                raw: true
+            })).map((item)=>{
+                return  {
+                    timestamp: moment.tz(item.timestamp, config.timezone).format("YYYY-MM-DD HH:mm:ss.SSS Z"),
+                    v1: item.v1,
+                    v2: item.v2,
+                    v3: item.v3,
+                    vAvg: item.vAvg,
+                    i1: item.i1,
+                    i2: item.i2,
+                    i3: item.i3,
+                    iAvg: item.iAvg,
+                    kWh: item.kWh,
+                    pf: item.pf,
+                    freq: item.freq
+                }
+            })
+
+
+            return res.send(raw_data)
+            
+        }catch(e){
+            console.error(e)
+        }
+    },
 }
 
 function fnConditionOnPeak(startOnPeak, endOnPeak) {

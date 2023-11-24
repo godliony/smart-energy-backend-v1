@@ -27,6 +27,9 @@ module.exports = (app) => {
     
     app.get('/currentTime', TimezoneController.currentTime)
     app.get('/kWhReportMonthly',MeterLoggingController.kWhReportMonthly)
+
+    app.post('/meter/raw-data',MeterLoggingController.index)
+    app.post('/meter/raw-data-csv',MeterLoggingController.raw_data_csv)
     app.use(verifyJWT) 
 
     app.get('/role/:role_id', RoleController.show)
@@ -77,6 +80,7 @@ module.exports = (app) => {
     app.get('/total_kWhMonthlyDevice',MeterLoggingController.total_kWhMonthlyDevice)
     app.get('/total_kWhDailyDevice',MeterLoggingController.total_kWhDailyDevice)
 
+    
 
     app.get('/meter/:id/lastValue', MeterController.showMeterLastValue)
     app.post('/meter/lastValue', MeterController.showMultipleMeterLastValue)
